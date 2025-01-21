@@ -37,8 +37,9 @@ function on_open() {
     } catch (error) {
         console.log(error);
     }
-    ;
-};
+
+    setInterval(updatePromFile, 1000);
+}
 
 async function on_commands(data) {
     try {
@@ -46,12 +47,7 @@ async function on_commands(data) {
         console.log(`command: ${command}`)
         if (command !== 'getSettings')
             return;
-        // if (message["clockURL"]) {
-        //     cache["clockURL"] = message["clockURL"]
-        // }
-        // if (message["subCountURL"]) {
-        //     cache["subCountURL"] = message["subCountURL"]
-        // }
+
         if (message["promPushGatewayURL"]) {
             cache["promPushGatewayURL"] = message["promPushGatewayURL"]
         }
@@ -62,21 +58,30 @@ async function on_commands(data) {
 
 socket.createConnection(`/websocket/commands`, on_commands, undefined, on_open);
 
-function updatePromFile() {
+async function updatePromFile() {
     if (!cache["promPushGatewayURL"])
         return;
+
+    const baseUrl = window.location.origin + window.location.pathname;
+    const basePath = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const timerStr = await (await fetch(`${basePath}/subathon_evolved/clock.txt`)).text();
+    const subs = await (await fetch(`${basePath}/subathon_evolved/subscriptions.txt`)).text();
+    const [hours, minutes, seconds] = timerStr.split(':').map(Number);
+    const timerSeconds = hours * 3600 + minutes * 60 + seconds;
+    console.log(`timer is ${timerStr} (${timerSeconds}s), subs is ${subs}`);
 
     let output = '';
     output += '# HELP farmathon_timer_remaining_seconds Time left in the farmathon timer\n';
     output += '# TYPE farmathon_timer_remaining_seconds gauge\n';
-    output += `farmathon_timer_remaining_seconds ${undefined}\n`;
+    output += `farmathon_timer_remaining_seconds ${timerSeconds}\n`;
     output += '\n';
     output += '# HELP farmathon_accumulated_subs Subs gained during farmathon\n';
     output += '# TYPE farmathon_accumulated_subs gauge\n';
-    output += `farmathon_accumulated_subs ${undefined}\n`;
+    output += `farmathon_accumulated_subs ${subs}\n`;
 
     fetch(cache["promPushGatewayURL"], {
-        method: 'POST',
+        method: 'PUT',
+        // mode: 'no-cors',
         headers: {
             'Content-Type': 'text/plain',
         },
