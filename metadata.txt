@@ -1,0 +1,6 @@
+Usecase: obs-overlay
+Name: farmathon_prom_exporter
+Version: 0.1
+Author: ilw8
+CompatibleWith: tosu
+Notes: elp

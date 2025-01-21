@@ -1,0 +1,10 @@
+[
+	{
+        "uniqueID": "promPushGatewayURL",
+        "type": "text",
+        "title": "Path to prometheus export file",
+        "description": "see title",
+        "options": "",
+        "value": ""
+    }
+]
