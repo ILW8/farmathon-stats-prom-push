@@ -38,7 +38,7 @@ function on_open() {
         console.log(error);
     }
 
-    setInterval(updatePromFile, 1000);
+    setInterval(updatePromFile, 497);
 }
 
 async function on_commands(data) {
