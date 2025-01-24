@@ -2,7 +2,15 @@
 	{
         "uniqueID": "promPushGatewayURL",
         "type": "text",
-        "title": "Path to prometheus export file",
+        "title": "URL to prometheus pushgateway for farmathon timer/subs data",
+        "description": "see title",
+        "options": "",
+        "value": ""
+    },
+	{
+        "uniqueID": "promPushGatewayHeartrateURL",
+        "type": "text",
+        "title": "URL to prometheus pushgateway for heartrate data",
         "description": "see title",
         "options": "",
         "value": ""
