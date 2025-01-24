@@ -14,5 +14,13 @@
         "description": "see title",
         "options": "",
         "value": ""
+    },
+	{
+        "uniqueID": "pulsoidAPIToken",
+        "type": "text",
+        "title": "Token to access pulsoid api",
+        "description": "should look like a guid",
+        "options": "",
+        "value": ""
     }
 ]
