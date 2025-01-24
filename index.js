@@ -1,5 +1,5 @@
 import WebSocketManager from './js/socket.js';
-import ReconnectingWebSocket from './js/reconnecting-websocket.min'
+// import ReconnectingWebSocket from './js/reconnecting-websocket.min.js'
 
 
 const cache = {};
