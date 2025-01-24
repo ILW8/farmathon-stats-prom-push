@@ -10,25 +10,6 @@ let host = "127.0.0.1:24050" || window.location.host;
 const socket = new WebSocketManager(host);
 
 
-const commands_text = document.createElement('div');
-commands_text.id = 'commands_text';
-commands_text.classList.add('commands');
-
-
-const authorization = document.createElement('div');
-authorization.id = 'authorization';
-authorization.classList.add('authorization');
-authorization.innerHTML = 'Pending';
-
-const modal = document.createElement('div');
-modal.id = 'modal';
-modal.classList.add('modal');
-
-
-document.body.appendChild(commands_text);
-document.body.appendChild(authorization);
-document.body.appendChild(modal);
-
 
 function on_open() {
     try {
@@ -55,6 +36,17 @@ async function on_commands(data) {
         if (message["promPushGatewayURL"]) {
             cache["promPushGatewayURL"] = message["promPushGatewayURL"]
         }
+
+        if (message['promPushGatewayHeartrateURL']) {
+            cache['promPushGatewayHeartrateURL'] = message['promPushGatewayHeartrateURL'];
+        }
+
+        if (message['pulsoidAPIToken']) {
+            // create pulsoid websocket here:
+            // url: wss://dev.pulsoid.net/api/v1/data/real_time?access_token=<TOKEN_HERE>&response_mode=text_plain_only_heart_rates
+        }
+
+
     } catch (error) {
         console.log(error);
     }
