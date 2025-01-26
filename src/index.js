@@ -17,19 +17,19 @@ function on_open() {
         socket.sendCommand('getSettings', encodeURI(window.COUNTER_PATH));
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 
     setInterval(updateSubs, 498);
     setInterval(updateTimeRemaining, 497);
 
-    setInterval(updatePromSubathonMetrics, 999);
+    // setInterval(updatePromSubathonMetrics, 999);
 }
 
 async function on_commands(data) {
     try {
         const {command, message} = data;
-        console.log(`command: ${command}`)
+        // console.log(`command: ${command}, msg=${JSON.stringify(message)}`);
         if (command !== 'getSettings')
             return;
 
@@ -48,7 +48,7 @@ async function on_commands(data) {
 
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 
@@ -58,13 +58,13 @@ let subs = null;
 let timerSeconds = null;
 
 async function updateSubs() {
-    const timerStr = await (await fetch(`${basePath}/subathon_evolved/clock.txt`)).text();
+    const timerStr = await (await fetch(`/subathon_evolved/clock.txt`)).text();
     const [hours, minutes, seconds] = timerStr.split(':').map(Number);
     timerSeconds = hours * 3600 + minutes * 60 + seconds;
 }
 
 async function updateTimeRemaining() {
-    subs = await (await fetch(`${basePath}/subathon_evolved/subscriptions.txt`)).text();
+    subs = await (await fetch(`/subathon_evolved/subscriptions.txt`)).text();
 }
 
 async function updatePromSubathonMetrics() {
@@ -96,7 +96,7 @@ async function updatePromSubathonMetrics() {
 }
 
 async function updatePromHeartrateMetric(heartrate) {
-        if (!cache["promPushGatewayHeartrateURL"])
+    if (!cache["promPushGatewayHeartrateURL"])
         return;
 
     let output = '';

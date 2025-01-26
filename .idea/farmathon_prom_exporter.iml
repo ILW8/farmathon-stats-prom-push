@@ -4,5 +4,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.13" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="@aws-sdk/client-s3" level="application" />
+    <orderEntry type="library" name="@aws-amplify" level="application" />
   </component>
 </module>
