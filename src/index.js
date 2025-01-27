@@ -1,14 +1,51 @@
 import WebSocketManager from './js/socket.js';
 // import ReconnectingWebSocket from './js/reconnecting-websocket.min.js'
+import {
+    S3Client,
+    PutObjectCommand
+} from '@aws-sdk/client-s3';
 
 
 const cache = {};
-const baseUrl = window.location.origin + window.location.pathname;
-const basePath = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
 let host = "127.0.0.1:24050" || window.location.host;
 const socket = new WebSocketManager(host);
 
+
+async function upload_file_s3(key, content) {
+    const s3_access_key = cache["S3AccessKey"];
+    const s3_secret_key = cache["S3SecretKey"];
+    const s3_endpoint = cache["S3Endpoint"];
+    const bucket_name = cache["S3Bucket"];
+
+    if (!s3_access_key || !s3_secret_key || !s3_endpoint || !bucket_name) {
+        console.warn("missing s3 configuration");
+        return false;
+    }
+
+    const config = {
+        credentials: { accessKeyId: s3_access_key, secretAccessKey: s3_secret_key },
+        endpoint: s3_endpoint,
+        region: 'us-east-1'
+    };
+
+    // noinspection JSCheckFunctionSignatures
+    const client = new S3Client(config);
+    const command = new PutObjectCommand({
+        "Body": JSON.stringify(content),
+        "Bucket": bucket_name,
+        "Key": key
+    });
+    try {
+        // noinspection TypeScriptValidateTypes
+        await client.send(command);
+    } catch (err) {
+        console.error(`failed uploading object: ${err}`);
+        return false;
+    }
+
+    return true;
+}
 
 
 function on_open() {
@@ -23,7 +60,12 @@ function on_open() {
     setInterval(updateSubs, 498);
     setInterval(updateTimeRemaining, 497);
 
-    // setInterval(updatePromSubathonMetrics, 999);
+    setInterval(updatePromSubathonMetrics, 999);
+    setInterval(() => {
+        upload_file_s3('timer.txt', timerSeconds).then((res) => {
+            console.log(`uploaded timer with value: ${timerSeconds} (${res ? 'ok' : 'failed'})`);
+        });
+    }, 1500);
 }
 
 async function on_commands(data) {
@@ -33,18 +75,10 @@ async function on_commands(data) {
         if (command !== 'getSettings')
             return;
 
-        if (message["promPushGatewayURL"]) {
-            cache["promPushGatewayURL"] = message["promPushGatewayURL"]
-        }
+        for (const key in message)
+            cache[key] = message[key];
 
-        if (message['promPushGatewayHeartrateURL']) {
-            cache['promPushGatewayHeartrateURL'] = message['promPushGatewayHeartrateURL'];
-        }
-
-        if (message['pulsoidAPIToken']) {
-            // create pulsoid websocket here:
-            // url: wss://dev.pulsoid.net/api/v1/data/real_time?access_token=<TOKEN_HERE>&response_mode=text_plain_only_heart_rates
-        }
+        console.log(JSON.stringify(cache));
 
 
     } catch (error) {
@@ -67,9 +101,14 @@ async function updateTimeRemaining() {
     subs = await (await fetch(`/subathon_evolved/subscriptions.txt`)).text();
 }
 
+
+
 async function updatePromSubathonMetrics() {
     if (!cache["promPushGatewayURL"])
+    {
+        console.warn("missing prometheus push gateway url");
         return;
+    }
 
     let output = '';
     output += '# HELP farmathon_timer_remaining_seconds Time left in the farmathon timer\n';

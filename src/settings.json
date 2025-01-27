@@ -1,26 +1,58 @@
 [
-	{
-        "uniqueID": "promPushGatewayURL",
-        "type": "text",
-        "title": "URL to prometheus pushgateway for farmathon timer/subs data",
-        "description": "see title",
-        "options": "",
-        "value": ""
-    },
-	{
-        "uniqueID": "promPushGatewayHeartrateURL",
-        "type": "text",
-        "title": "URL to prometheus pushgateway for heartrate data",
-        "description": "see title",
-        "options": "",
-        "value": ""
-    },
-	{
-        "uniqueID": "pulsoidAPIToken",
-        "type": "text",
-        "title": "Token to access pulsoid api",
-        "description": "should look like a guid",
-        "options": "",
-        "value": ""
-    }
+  {
+    "uniqueID": "promPushGatewayURL",
+    "type": "text",
+    "title": "URL to prometheus pushgateway for farmathon timer/subs data",
+    "description": "see title",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "promPushGatewayHeartrateURL",
+    "type": "text",
+    "title": "URL to prometheus pushgateway for heartrate data",
+    "description": "see title",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "pulsoidAPIToken",
+    "type": "text",
+    "title": "Token to access pulsoid api",
+    "description": "should look like a guid",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "S3AccessKey",
+    "type": "text",
+    "title": "S3 access key",
+    "description": "access key",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "S3SecretKey",
+    "type": "text",
+    "title": "S3 secret key",
+    "description": "secret key",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "S3Endpoint",
+    "type": "text",
+    "title": "S3 endpoint",
+    "description": "endpoint",
+    "options": "",
+    "value": ""
+  },
+  {
+    "uniqueID": "S3Bucket",
+    "type": "text",
+    "title": "S3 bucket",
+    "description": "bucket name",
+    "options": "",
+    "value": ""
+  }
 ]
