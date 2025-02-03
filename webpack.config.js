@@ -30,6 +30,7 @@ module.exports = {
             patterns: [
                 { from: 'src/metadata.txt', to: '.' },
                 { from: 'src/settings.json', to: '.' },
+                { from: 'src/styles/', to: 'styles/' },
             ],
         }),
     ],

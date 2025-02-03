@@ -7,10 +7,25 @@ import {
 
 
 const cache = {};
-
 let host = "127.0.0.1:24050" || window.location.host;
+let subs = null;
+let timerSeconds = null;
+
 const socket = new WebSocketManager(host);
 
+/** @property {Object?} [obsstudio] */
+if (window.obsstudio) {
+    socket.createConnection(`/websocket/commands`, on_commands, undefined, on_open);
+} else {
+    const modal = document.createElement('div');
+
+    modal.id = 'modal';
+    modal.classList.add('modal');
+    modal.classList.add('-red');
+    modal.innerHTML = `Socket not created, load this page in OBS.`;
+
+    document.body.append(modal);
+}
 
 async function upload_file_s3(key, content) {
     const s3_access_key = cache["S3AccessKey"];
@@ -86,11 +101,6 @@ async function on_commands(data) {
     }
 }
 
-socket.createConnection(`/websocket/commands`, on_commands, undefined, on_open);
-
-let subs = null;
-let timerSeconds = null;
-
 async function updateSubs() {
     const timerStr = await (await fetch(`/subathon_evolved/clock.txt`)).text();
     const [hours, minutes, seconds] = timerStr.split(':').map(Number);
@@ -100,8 +110,6 @@ async function updateSubs() {
 async function updateTimeRemaining() {
     subs = await (await fetch(`/subathon_evolved/subscriptions.txt`)).text();
 }
-
-
 
 async function updatePromSubathonMetrics() {
     if (!cache["promPushGatewayURL"])
