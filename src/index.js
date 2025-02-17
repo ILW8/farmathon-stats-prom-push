@@ -16,6 +16,7 @@ const socket = new WebSocketManager(host);
 /** @property {Object?} [obsstudio] */
 if (window.obsstudio) {
     socket.createConnection(`/websocket/commands`, on_commands, undefined, on_open);
+    socket.api_v2(on_apiv2_msg, undefined, undefined);
 } else {
     const modal = document.createElement('div');
 
@@ -101,6 +102,43 @@ async function on_commands(data) {
     }
 }
 
+async function on_apiv2_msg(data) {
+    if (!cache.osu_is_running) cache.osu_is_running = true;
+
+    try {
+        /**
+         * state.number
+         * - 2: playing
+         * - 3: exit
+         * - 5: song select
+         * - 7: results screen
+         */
+        cache['osu_state'] = data.state.number;
+
+        switch (data.state.number) {
+            case 2:
+            case 7:
+                cache['fc_pp'] = data.play.pp.fc;
+                cache['current_pp'] = data.play.pp.current;
+                break;
+
+            case 5:
+            default:
+                cache['fc_pp'] = data.performance.accuracy['100'];
+                cache['current_pp'] = data.play.pp.current;
+                break;
+
+            case 3:
+                cache.osu_is_running = false;
+        }
+
+        console.log(`fc_pp: ${cache['fc_pp']}, current_pp: ${cache['current_pp']}, state: ${data.state.number} (${data.state.name})`);
+
+    } catch (error) {
+        console.log('api-v2', error);
+    }
+}
+
 async function updateSubs() {
     const timerStr = await (await fetch(`/subathon_evolved/clock.txt`)).text();
     const [hours, minutes, seconds] = timerStr.split(':').map(Number);
@@ -121,11 +159,23 @@ async function updatePromSubathonMetrics() {
     let output = '';
     output += '# HELP farmathon_timer_remaining_seconds Time left in the farmathon timer\n';
     output += '# TYPE farmathon_timer_remaining_seconds gauge\n';
-    output += `farmathon_timer_remaining_seconds ${timerSeconds}\n`;
-    output += '\n';
+    output += `farmathon_timer_remaining_seconds ${timerSeconds}\n\n`;
+
     output += '# HELP farmathon_accumulated_subs Subs gained during farmathon\n';
     output += '# TYPE farmathon_accumulated_subs gauge\n';
-    output += `farmathon_accumulated_subs ${subs}\n`;
+    output += `farmathon_accumulated_subs ${subs}\n\n`;
+
+    output += '# HELP osu_game_state osu! game state\n';
+    output += '# TYPE osu_game_state gauge\n';
+    output += `osu_game_state ${cache.osu_state ?? 3}\n\n`;
+
+    output += '# HELP osu_current_pp Current pp value (in-game or results screen)\n';
+    output += '# TYPE osu_current_pp gauge\n';
+    output += `osu_current_pp ${cache.current_pp ?? 0}\n\n`;
+
+    output += '# HELP osu_fc_pp Attainable pp if FC at current accuracy (or SS if in song select)\n';
+    output += '# TYPE osu_fc_pp gauge\n';
+    output += `osu_fc_pp ${cache.fc_pp ?? 0}\n`;
 
     fetch(cache["promPushGatewayURL"], {
         method: 'PUT',
