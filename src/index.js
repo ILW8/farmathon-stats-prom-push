@@ -108,6 +108,7 @@ async function on_apiv2_msg(data) {
     try {
         /**
          * state.number
+         * - 0: menu
          * - 2: playing
          * - 3: exit
          * - 5: song select
@@ -131,8 +132,6 @@ async function on_apiv2_msg(data) {
             case 3:
                 cache.osu_is_running = false;
         }
-
-        console.log(`fc_pp: ${cache['fc_pp']}, current_pp: ${cache['current_pp']}, state: ${data.state.number} (${data.state.name})`);
 
     } catch (error) {
         console.log('api-v2', error);
