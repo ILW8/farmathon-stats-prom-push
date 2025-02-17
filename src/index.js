@@ -131,6 +131,8 @@ async function on_apiv2_msg(data) {
 
             case 3:
                 cache.osu_is_running = false;
+                cache['fc_pp'] = 0;
+                cache['current_pp'] = 0;
         }
 
     } catch (error) {
