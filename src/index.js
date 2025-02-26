@@ -109,12 +109,28 @@ async function on_apiv2_msg(data) {
         /**
          * state.number
          * - 0: menu
+         * - 1: editor (edit)
          * - 2: playing
          * - 3: exit
+         * - 4: edit song select (selectEdit)
          * - 5: song select
          * - 7: results screen
          */
         cache['osu_state'] = data.state.number;
+        cache['osu_beatmap_id'] = data.beatmap.id;
+        cache['osu_beatmapset_id'] = data.beatmap.set;
+        cache['osu_mods_bitmask'] = data.play.mods.number;
+
+        cache['osu_pct_complete'] = 0;
+        if (cache['osu_state'] === 2 || cache['osu_state'] === 7) {
+            const drain_time = data.beatmap.time.lastObject - data.beatmap.time.firstObject;
+            const live_drain_time = Math.max(0, data.beatmap.time.live - data.beatmap.time.firstObject);
+            cache['osu_pct_complete'] = Math.min(1, live_drain_time / drain_time) * 100;
+        }
+        console.log(`percent complete: ${cache['osu_pct_complete']}`);
+
+        cache['osu_combo'] = data.play.combo.current;
+        cache['osu_accuracy'] = data.play.accuracy;
 
         switch (data.state.number) {
             case 2:
@@ -177,6 +193,30 @@ async function updatePromSubathonMetrics() {
     output += '# HELP osu_fc_pp Attainable pp if FC at current accuracy (or SS if in song select)\n';
     output += '# TYPE osu_fc_pp gauge\n';
     output += `osu_fc_pp ${cache.fc_pp ?? 0}\n`;
+
+    output += '# HELP osu_beatmap_id Current beatmap ID\n';
+    output += '# TYPE osu_beatmap_id gauge\n';
+    output += `osu_beatmap_id ${cache.osu_beatmap_id ?? 0}\n`;
+
+    output += '# HELP osu_beatmapset_id Current beatmapset ID\n';
+    output += '# TYPE osu_beatmapset_id gauge\n';
+    output += `osu_beatmapset_id ${cache.osu_beatmapset_id ?? 0}\n`;
+
+    output += '# HELP osu_mods_bitmask Current mods bitmask\n';
+    output += '# TYPE osu_mods_bitmask gauge\n';
+    output += `osu_mods_bitmask ${cache.osu_mods_bitmask ?? 0}\n`;
+
+    output += '# HELP osu_pct_complete Percentage of beatmap completed\n';
+    output += '# TYPE osu_pct_complete gauge\n';
+    output += `osu_pct_complete ${cache.osu_pct_complete ?? 0}\n`;
+
+    output += '# HELP osu_combo Current combo\n';
+    output += '# TYPE osu_combo gauge\n';
+    output += `osu_combo ${cache.osu_combo ?? 0}\n`;
+
+    output += '# HELP osu_accuracy Current accuracy\n';
+    output += '# TYPE osu_accuracy gauge\n';
+    output += `osu_accuracy ${cache.osu_accuracy ?? 100.0}\n`;
 
     fetch(cache["promPushGatewayURL"], {
         method: 'PUT',
